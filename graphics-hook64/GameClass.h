@@ -1,4 +1,16 @@
 #include "UnrealEngineClasses.h"
+class WorldSettings
+{
+public:
+    char pad_0000[0x2E8]; //0x0000
+    float TimeDilation;
+};
+class ULevel
+{
+public:
+    char pad_0000[0x258]; //0x0000
+    class WorldSettings* worldsettings;
+};
 class Mesh
 {
 
@@ -27,6 +39,12 @@ class LocalPlayers
 public:
     class LocalPlayer* LocalPlayer; //0x0000
 }; //Size: 0x0008
+class PlayerCameraManager
+{
+public:
+    char pad_0000[0xe80]; //0x0000
+    FVector ViewTarget_POV_Location;
+};
 class PlayerController
 {
 public:
@@ -38,7 +56,8 @@ public:
     class Player* playerstate; //0x0228
     char pad_0230[32]; //0x0230
     class PawnPriv* APawn; //0x0250
-    char pad_0258[1540]; //0x0258
+    char pad_0258[96]; //0x0258
+    class PlayerCameraManager* PlayerCameraManager; //0x02B8
 
 }; //Size: 0x085C
 class LocalPlayer
@@ -75,23 +94,11 @@ public:
     char pad_0000[0x238]; //0x0000
     TArray<Player*>(Player);
 }; //Size: 0x0848
-class WorldSettings
-{
-public:
-    char pad_0000[0x2E8]; //0x0000
-    float TimeDilation;
-};
-class PersistentLevel
-{
-public:
-    char pad_0000[0x258]; //0x0000
-    class WorldSettings* worldsettings;
-};
 class UWorld
 {
 public:
     char pad_0000[48]; //0x0000
-    class PersistentLevel* PersistentLevel; //0x0030
+    class ULevel* PersistentLevel; //0x0030
     char pad_0038[224]; //0x0038
     class AGameModeBase* AuthorityGameMode; // 0x118
     class GameState* GameState; //0x0120

@@ -15,5 +15,10 @@ public:
 	static float GetDistanceTo(AActor* start, AActor* end);
 	static void GetViewportSize(PlayerController* localplayer, int32_t* SizeX, int32_t* SizeY);
 	static void drawbone(Mesh* enemyMesh, PlayerController* pcontroller, UCanvas* canvas, int bone1, int bone2);
+	static void normalizeAngles(FRotator angles);
+	static void clampAngles(FRotator angles);
+	static FRotator GetaimAnglesTo(FVector localPosition, FVector target);
+	static bool LineOfSign(PlayerController* playerController, PawnPriv* actor);
+	static void retByte(uintptr_t address);
 };
 

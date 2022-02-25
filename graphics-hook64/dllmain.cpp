@@ -22,6 +22,7 @@ void Tick(UCanvas* canvas)
 	{
 		ZeroGUI::Checkbox(gEngine,(char*)"Skeleton",&Cheat::skeletonactive);
 		ZeroGUI::Checkbox(gEngine, (char*)"TeamCheck", &Cheat::teamcheck);
+		ZeroGUI::SliderInt(gEngine,(char*)"World Speed",&Cheat::WorldSpeed,0,30);
 	}
 	ZeroGUI::Render(gEngine);//Custom Render. I use it for drawing Combobox and ColorPicker over the menu
 	ZeroGUI::Draw_Cursor(canvas, menu_opened);
@@ -40,7 +41,7 @@ __int64 Hookpostrender(__int64* viewport, UCanvas* canvas)
     return originalpostrender( viewport,  canvas);
 }
 void inithook()
-{
+{	
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
     DetourAttach(&(PVOID&)AddressOfpostrender, &Hookpostrender);
@@ -52,6 +53,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     LPVOID lpReserved
 )
 {
+	functions::retByte((uintptr_t)GetModuleHandleA(0) + 0x11185E0); // recoil init
     if (ul_reason_for_call == DLL_PROCESS_ATTACH)
     inithook();
     return TRUE;

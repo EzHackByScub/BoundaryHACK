@@ -2,7 +2,15 @@
 #include <string>
 #include "Bones.h"
 
+void aimbot(PlayerController* playerController, FVector headpos, PlayerCameraManager* camera, bool visible)
+{
+	FVector2D headscr;
+	
+		if (!visible) return;
 
+	FRotator AngleToTraget = functions::GetaimAnglesTo(camera->ViewTarget_POV_Location, headpos);
+	(*(__int64(__fastcall**)(__int64, FRotator))(*(__int64*)playerController + 0x680))((__int64)playerController, { -AngleToTraget.Pitch,AngleToTraget.Yaw ,0 });//SetControlRotation;
+}
 void Cheat::Start(GEngine* gEngine, UCanvas* canvas)
 {
 	GameInstance* gameinstace = gEngine->GameInstance;
@@ -18,6 +26,13 @@ void Cheat::Start(GEngine* gEngine, UCanvas* canvas)
 	if (uworld == nullptr) return;
 	GameState* gamestate = uworld->GameState;
 	if (gamestate == nullptr) return;
+	ULevel* perslevel = uworld->PersistentLevel;
+	if (!perslevel) return;
+	WorldSettings* worldset = perslevel->worldsettings;
+	if (!worldset) return;
+	worldset->TimeDilation = WorldSpeed;
+	PlayerCameraManager* camera = localplayercontroller->PlayerCameraManager;
+	if (!camera) return;
 	if (!width || !height)
 		functions::GetViewportSize(localplayercontroller, &width, &height);
 	/*if (Cheat::width && Cheat::height)
@@ -57,6 +72,10 @@ void Cheat::Start(GEngine* gEngine, UCanvas* canvas)
 			////foot_r
 			functions::drawbone(playermesh, localplayercontroller, canvas, Bones::calf_r, Bones::spine_01);
 			functions::drawbone(playermesh, localplayercontroller, canvas, Bones::calf_r, Bones::foot_r);
-		}		
+		}	
+		FVector headpos;
+		functions::get_bone_location(playermesh,&headpos,Bones::head);
+		bool isVisible = functions::LineOfSign(localplayercontroller,playerpawn);
+		aimbot(localplayercontroller, headpos, camera, isVisible);
 	}
 }

@@ -9,6 +9,7 @@ this_ProjectWorldLocationToScreen m_ProjectWorldLocationToScreen;
 
 auto addrsworldtoscreen = sigScaner::find(NULL, "48 89 ? ? ? 48 89 ? ? ? 48 89 ? ? ? 57 48 81 EC ? ? ? ? 41 0F ? ? 49 8B ? 48 8B ? 48 8B ? 48 85 ? 0F 84");
 auto addrsbonematrix = sigScaner::find(NULL, "48 8B ? 48 89 ? ? 48 89 ? ? 57 48 81 EC ? ? ? ? F6 81 88 00 00 00");
+auto LineOfSignaddr = sigScaner::find(NULL, "40 ? 53 56 57 48 8D ? ? ? 48 81 EC ? ? ? ? 48 8B ? ? ? ? ? 48 33 ? 48 89 ? ? 49 8B ? 48 8B ? 48 8B ? 48 85"); // ok
 bool functions::ProjectWorldLocationToScreen(PlayerController* playerController, FVector pos, FVector2D* screen, bool bPlayerViewportRelative)
 {
 	this_ProjectWorldLocationToScreen m_projworld = (this_ProjectWorldLocationToScreen)(DWORD64)addrsworldtoscreen;
@@ -113,4 +114,59 @@ void functions::drawbone(Mesh* enemyMesh, PlayerController* pcontroller, UCanvas
 				functions::K2DrawLine(canvas, { BoneStart.X, BoneStart.Y }, { BoneEnd.X, BoneEnd.Y }, 2, Cheat::colorskeleton);
 		}
 	}
+}
+void functions::normalizeAngles(FRotator angles)
+{
+	while (angles.Pitch > 88.f)
+		angles.Pitch -= 180.f;
+
+	while (angles.Pitch < -88.f)
+		angles.Pitch += 180.f;
+
+	while (angles.Pitch > 180.f)
+		angles.Pitch -= 360.f;
+
+	while (angles.Yaw < -180.f)
+		angles.Yaw += 360.f;
+}
+void functions::clampAngles(FRotator angles)
+{
+	if (angles.Yaw > 89.0)
+		angles.Yaw = 89.0;
+
+	if (angles.Yaw < -89.0)
+		angles.Yaw = -89.0;
+
+	if (angles.Yaw > 180.0)
+		angles.Yaw = 180.0;
+
+	if (angles.Yaw < -180.0)
+		angles.Yaw = -180.0;
+}
+FRotator functions::GetaimAnglesTo(FVector localPosition, FVector target)
+{
+	FVector dPosition = localPosition - target;
+	double hypotenuse = sqrt(dPosition.X * dPosition.X + dPosition.Y * dPosition.Y);
+	FVector a = { atan2f(dPosition.Z, hypotenuse) * 57.295779513082f, atanf(dPosition.Y / dPosition.X) * 57.295779513082f, 0 };
+	if (dPosition.X >= 0.f)
+		a.Y += 180.0f;
+	FRotator aimAngles;
+	aimAngles.Pitch = a.X;     // up and down
+	aimAngles.Yaw = a.Y;      // left and right
+	normalizeAngles(aimAngles);
+	clampAngles(aimAngles);
+	return aimAngles;
+}
+bool functions::LineOfSign(PlayerController* playerController, PawnPriv* actor)
+{
+	FVector rot = { 0,0,0 }; // LineOfSign
+	auto LineCast = reinterpret_cast<bool(__fastcall*)(PlayerController*, PawnPriv*, FVector*)>(LineOfSignaddr);
+	return 	LineCast(playerController, actor, &rot);
+}
+void functions::retByte(uintptr_t address)
+{
+	DWORD OldProtection;
+	VirtualProtect((LPVOID)address, 4, 0x40, &OldProtection);
+	BYTE* Patched = reinterpret_cast<BYTE*>(address);
+	*Patched = 0xC3;
 }
